@@ -1,4 +1,6 @@
+# Ignore the compiled binary class files. (Having both of these should be redundant, but it can't hurt, right?)
 *.class
+bin/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -13,3 +15,7 @@ hs_err_pid*
 
 # Eclipse's .classpath
 .classpath
+
+# Ignore eclipse's .gitignore (but keep mine!)
+.gitignore
+!/.gitignore
