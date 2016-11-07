@@ -1,1 +1,1 @@
-# Chess
+This is a rudiemntary attempt at creating a neural network to play chess using an evolutionary algorithm. I don't know much about neural networks or evolutionary algorithms (or chess, but that should be irrelevant thanks to the magic of neural networks and evolution!), so hopefully this will help me learn.
