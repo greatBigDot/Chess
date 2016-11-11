@@ -92,17 +92,18 @@ public class Genome {
 	 *   yet, but I'll figure out. (idea: IVT like below, then just recurse to
 	 *   remove extras(verify this is uniformly random)) (that has issues--to
 	 *   avoid meta-meta-seeds, I need the order of the ~500 pairs to be
-	 *   random.) TODO: sort this out ASAP
+	 *   random (see below).) TODO: sort this out ASAP
 	 *
 	 * * metaCrossoverSeed--[rep] an instance field of Population. Note that
 	 *   though reproduction occurs every generation, there is only one of these
-	 *   per population (I really don't want to have to deal with 
-	 *   meta-meta-seeds). This should be okay so long as the previous pairing
-	 *   process leaves them ordered randomly. That way, the top genome (for 
-	 *   example) won't have the first (of ~1000) crossoverSeed every time. I
-	 *   could be wrong, so... TODO: Make sure that meta-meta-seeds are
-	 *   unnecessary in crossover--can I reuse the same meta-seed every 
-	 *   generation? If it does work, then TODO: see if the same logic can be 
+	 *   per population (I really don't want to have to deal with meta-meta-
+	 *   seeds at this level). This should be okay so long as the previous
+	 *   pairing process leaves them ordered randomly--AND orders them
+	 *   differently every generation. That way, the top genome (for example)
+	 *   won't have the first (of ~1000) crossoverSeed every time. I could be
+	 *   wrong, so... TODO: Make sure that meta-meta-seeds are unnecessary in
+	 *   crossover under this system--can I reuse the same meta-seed every
+	 *   generation? If it does work, then TODO: see if the same logic can be
 	 *   used to cut down on meta-seeds. This produces popSize ~= 1000 longs
 	 *   from Long.MIN_LENGTH to Long.MAX_LENGTH:
 	 *       * crossoverSeed--while it itself is not a field of any class, the 
@@ -114,44 +115,42 @@ public class Genome {
 	 *             * crossoverKey--contained in a two dimensional array instance
 	 *               field of Population. These are used to determine how
 	 *               children are created from their parents. See the methods
-	 *               for more details, but essentially each parent has a
-	 *               probability, p and q=1-p, which are directly proportional
-	 *               to their respective fitnesses, which represents the
-	 *               probability that a given codon will come from each parent.
-	 *               To simulate this in a way that I can repeat (with the magic
-	 *               of seeded pseudorandomness!), this double is created. It
-	 *               is uniformly distributed over [0,1] (actually, it's [0,1)
-	 *               because of some unfathomable [shut up, eclipse's spell-
-	 *               check--that word is perfectly spelled!] reasoning by Java's
-	 *               libraries' creators.) If 0 <= u <= p, it goes with parent
-	 *               A's codon for that position. If p<u<=1, parent B's. (Note:
-	 *               I think this is how inverse transform sampling works,
-	 *               except obviously with uncountably infinitely many values
-	 *               instead of two. Or maybe my intuition is off.)
+	 *               for more details on reproduction itself, but essentially
+	 *               each parent has a probability, p and q=1-p, which are
+	 *               directly proportional to their respective fitnesses, which
+	 *               represents the probability that a given codon will come
+	 *               from each parent. To simulate this in a way that I can
+	 *               repeat (with the magic of seeded pseudorandomness!), this 
+	 *               double is created. It is uniformly distributed over [0,1]
+	 *               (actually, it's [0,1) because of some unfathomable [shut 
+	 *               up, eclipse's spell-check--that word is perfectly spelled!]
+	 *               reasoning by Java's libraries' creators.) If 0 <= key <= p,
+	 *               it goes with parent A's codon for that position. If
+	 *               p<key<=1, parent B's. (Note: I think this is how inverse
+	 *               transform sampling works, except obviously with uncountably
+	 *               infinitely many values instead of two. Or maybe my 
+	 *               intuition is off.)
 	 *               
-	 * * mutationSeed--[rep] this is to ensure that mutation happens the proper
-	 *   percentage of the time (i.e., mutateProb ~= 1%), but still have the entire
-	 *   process be seeded. (By the way, right now all a mutation does is change
-	 *   a codon by +/- mutateVal ~= +/-5% of what it otherwise would be, but I
-	 *   would like to make it continuous and give it sign-flipping abilities in
-	 *   the future. TODO: figure out how to do that.) It produces ~=122,880
+	 * * mutationSeed--[rep] this is to ensure that mutatix produces ~=122,880
 	 *   ints from ~=-12,288,000 to ~= 12,288,000.
 	 *       * mutateKey--so the way I'm making this work is a total kludge.
-	 *         ~=122,880 keys are produced--~=mutateProb of the total 
-	 *         population. The mutation is preformed as follows: the codon 
-	 *         corresponding to the absolute value of a key is mutated by 
-	 *         mutateVal if the key is positive and -mutateVal if the
-	 *         key is negative. If the same codon is produced twice, it is
-	 *         mutated twice. If 0 is a key, nothing happens. If a codon is
-	 *         mutated above 2 or below -2, it gets set to those bounds
-	 *         respectively. "But wait!" you say. "That means that less than 
-	 *         mutateProp * ~=12,288,000 codons may be mutated, but no more!" To
-	 *         that I say: Shut up and make a better system. But seriously, it
-	 *         may be fixable by taking mutateProp, shifting it upwards, then 
-	 *         using that to determine the number of mutated codons. I haven't
-	 *         done the math, so I don't know how feasible that is. TODO: Can I 
-	 *         fudge this kludge to a proper solution? (Oh, so "fudge" isn't a
-	 *         word now, eclipse? Really?)
+	 *         ~=122,880 keys are produced--~=mutateProb of the total number of
+	 *         codons in the population. The mutation is performed as follows:
+	 *         the codon corresponding to the absolute value of a key is mutate
+	 *         by mutateVal if the key is positive and -mutateVal if the key is 
+	 *         negative. If the same codon is produced twice, it is mutated 
+	 *         twice. If 0 is a key, nothing happens. If a codon is mutated
+	 *         above 2 or below -2, it gets set to those bounds respectively.
+	 *         "But wait!" you say. "That means that less than mutateProp
+	 *         (~=12,288,000) codons may be mutated, but never more!" To that I
+	 *         say: Shut up and make a better system. But seriously, it may be
+	 *         fixable by taking mutateProp, shifting it upwards, then using
+	 *         that to determine the number of mutated codons. I haven't done
+	 *         the math, so I don't know how feasible that is. If it isn't, then
+	 *         I'll just make a better way to do it (though it'll take up a good
+	 *         chunk of memory and slow down the program). TODO: Can I fudge
+	 *         this kludge to a proper solution? (Oh, so "fudge" isn't a word
+	 *         now, eclipse? Really?)
 	 * 
 	 * * faceOffMetaSeed--[sel] This produces ~20 (i.e., numRounds) to be used to determine pairing for the actual games. 
 	 * * faceoffSeed--[sel] this randomly chooses who battles who in the
