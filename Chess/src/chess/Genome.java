@@ -3,7 +3,6 @@ package chess;
 import java.util.Random;
 
 public class Genome {
-	//There are two seeds that will end up determining how the population evolves: the initialization seed and thenpop
 	//Total number of weights per genome: 64^2 + 64*(64*2) = 12288
 	
 	//TODO: Add castling! It'll mess up all the numbers: remember to use variables instead of hardcoded constants!
@@ -131,7 +130,7 @@ public class Genome {
 	 *               infinitely many values instead of two. Or maybe my 
 	 *               intuition is off.)
 	 *               
-	 * * mutationSeed--[rep] this is to ensure that mutatix produces ~=122,880
+	 * * mutationSeed--[rep] this is to ensure that mutation produces ~=122,880
 	 *   ints from ~=-12,288,000 to ~= 12,288,000.
 	 *       * mutateKey--so the way I'm making this work is a total kludge.
 	 *         ~=122,880 keys are produced--~=mutateProb of the total number of
@@ -151,12 +150,25 @@ public class Genome {
 	 *         chunk of memory and slow down the program). TODO: Can I fudge
 	 *         this kludge to a proper solution? (Oh, so "fudge" isn't a word
 	 *         now, eclipse? Really?)
-	 * 
-	 * * faceOffMetaSeed--[sel] This produces ~20 (i.e., numRounds) to be used to determine pairing for the actual games. 
-	 * * faceoffSeed--[sel] this randomly chooses who battles who in the
-	 *   selection stage. It uses
-	 * 
-	 * 
+	 *
+	 *
+	 *
+	 * That's it. Trust me--it's not as bad as it looks. Note that there is no
+	 * "faceOffKey" or seeds for it. That's because I'm just going to have 1
+	 * face off against 3, 2 against 4, 5 v. 7, 6 v. 8, etc. This will still
+	 * work because matingSeed will results in a randomly ordered population
+	 * each generation. That is, by saying 1 always plays 3 in the first round,
+	 * what I'm saying is the first child of 42 and 628 will play against the
+	 * first child of 156 and 27. (These numbers are just examples--and,
+	 * crucially, *they change every generation.* Note also that the first
+	 * generation face-offs will also be random--each seed corresponds to a
+	 * random unique gene pool at the beginning, so the numbered labels don't
+	 * yet mean anything.)
+	 *
+	 * The only mechanism yet to be worked out is matingSeed. That matters a lot
+	 * because that's what guarantees the faceOff keys and the
+	 * meta-meta-crossover seed are unnecessary; if I can't get mating seed to
+	 * work, the entire system will have to be reworked
 	 * 
 	 */
 
