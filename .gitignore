@@ -1,6 +1,6 @@
 # Ignore the compiled binary class files. (Having both of these should be redundant, but it can't hurt, right?)
 *.class
-bin/
+**/bin/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
