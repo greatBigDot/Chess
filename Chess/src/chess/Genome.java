@@ -152,7 +152,14 @@ public class Genome {
 	 *         this kludge to a proper solution? (Oh, so "fudge" isn't a word
 	 *         now, eclipse? Really?)
 	 * 
-	 * * faceOffMetaSeed--[sel] This produces ~20 (i.e., numRounds) to be used to determine pairing for the actual games. 
+	 * * faceOffMetaSeed--[sel] This produces 1 seeds per generation. I would
+	 *   like to have everything set up at the beginning and not deal with
+	 *   creating new random numbers periodically, but I don't see a way to do
+	 *   that.
+	 *       faceOffSeed--this produces ~20 
+	 * 
+	 * This produces ~20 (i.e., numRounds) to be used 
+	 *   to determine pairing for the actual games.
 	 * * faceoffSeed--[sel] this randomly chooses who battles who in the
 	 *   selection stage. It uses
 	 * 
