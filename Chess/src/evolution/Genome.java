@@ -3,7 +3,7 @@ package evolution;
 import java.util.Random;
 
 public class Genome {
-	//See below for length documentation.
+	//See below for a lengthy documentation.
 	
 	//Total number of weights per genome: 64^2 + 64*(64*2) = 12,288
 	//Genomes per population: roughly 1000
@@ -52,6 +52,7 @@ public class Genome {
 	
 	/**                          ****DOCUMENTATION****                          
 	 * 
+	 * I. EVOLUTION--
 	 * 
 	 * There are three stages to the genetic algorithm:
 	 * 
@@ -235,6 +236,94 @@ public class Genome {
 	 * random unique gene pool at the beginning, so the numbered labels don't
 	 * yet mean anything.)
 	 * 
+	 *
+	 * 
+	 * II. NEURAL NETWORK
+	 * 
+	 * What a neural network does, in the most general sense, is take in a
+	 * series of sensory inputs and output some action to take. Think of each
+	 * input and output as a box that stores a value. All of the input boxes
+	 * form one "layer," and all of the output boxes form another layer.
+	 * Additionally, there is (at least) one "hidden layer" between the input
+	 * and output layers. The values stored in the input data are sensory info
+	 * --in this case, the positions of the game pieces (and whether or not each
+	 * side has castled). To determine the value of, say, the 42nd box in the
+	 * hidden layer, the neural network multiplies each of the values of the
+	 * preceding layer by some weight, then finds their sum. Consequently, with
+	 * 66 boxes in the input layer and 98 in the hidden layer, there are a total
+	 * of 66 weights per hidden box, or 66*98 weights total from the input layer
+	 * to the hidden layer. (All of these weights, by the way, are the codons of
+	 * the neural networks' genome.) The weights range from -2 to +2. The same
+	 * process is done to determine the output layer from the hidden layer,
+	 * except after the weighted sum has been taken, it's run through (a linear
+	 * transformation of) the hyperbolic tangent function to make the values
+	 * stored in the output boxes be between 0 and 1. These values are used to
+	 * rank all possible moves (really, any line from and square to any other)
+	 * from most likely to least likely. Illegal moves are removed, and the
+	 * legal move with the highest score is that neural networks move for that
+	 * board configuration. Heres's an overview of the network and its layers:
+	 *
+	 *
+	 * * Input Layer--66 boxes. Represents the board configuration. Values in
+	 * boxes 0-63 are integers ranging from -6 to +6, inclusive; values in boxes
+	 * 64-65 are integers ranging from 0 to 1, inclusive. The first 64 boxes
+	 * each represent a square on the board; a value of 0 is an empty square, +1
+	 * is a pawn of your color, -1 is a pawn of the other color, +2 is a knight,
+	 * or you color,... you get the idea. The final two squares represent
+	 * whether or not the white king and black king have castled. I included
+	 * this because the input information should give you *everything* you need
+	 * to know about how to play the game from then on out. In theory, if a
+	 * grandmaster were to start a game at move 42, what he would do next could
+	 * depend very heavily on whether or not castling has occurred. Granted,
+	 * usually one can tell--but not always, which is why I included it. "But
+	 * wait! " I here you say. "Based on that criteria, shouldn't you include
+	 * whose move it is?" Yes, it does match the criteria, but whenever a neural
+	 * network turns inputs into outputs to make a move, it is its move, so it
+	 * wouldn't give any extra information. Finally, note that the box each
+	 * square is associated with changes with color. For example, at the start
+	 * of a game, box 7 refers to the network's bottom right rook--no matter
+	 * which color you are playing.
+	 * 
+	 * * Hidden Layer--98 boxes. Doesn't represent anything. Values in boxes are
+	 * integers ranging from -240 to +240, inclusive. (These bounds would never
+	 * be reached; 236 is only hit if every weight going into the hidden layer
+	 * box is 2 or -2, if both sides have queened all of their pawns, if the
+	 * original queen and the rooks remain, and if both sides have castled. For
+	 * reference, if every weight is 1 for your color and -1 for the other
+	 * color, then at the starting position the box is 74.) No normalization is
+	 * done after the weighted sum is taken (though I may change this in the
+	 * future by dividing by 66). Again, this layer doesn't represent anything;
+	 * it simply connects the input layer and output layer in a more complicated
+	 * way. I may add more hidden layers in the future. I chose to make this 98
+	 * boxes because that's the average of the input layer's cardinality and the
+	 * output layer's cardinality, rounded up.
+	 * 
+	 * Output Layer--129 boxes. Represents the move to make with the given board
+	 * configuration. Values in boxes 0-127 are reals ranging from 0 to 1,
+	 * exclusive; the value in box 128 is an integer ranging from 2 to 5,
+	 * inclusive. There is a normalization process (or rather, two); for boxes
+	 * 0-127, the weighted sum is run through (tanh(x/s_0)+1)/2, where 's_0' is
+	 * some as-yet-to-be-determined scaling value and tanh is the hyperbolic
+	 * tangent. The end result is that the weighted sum is mapped to a number
+	 * between 0 and 1, depending on how big it is. Box 129 runs the weighted
+	 * sum through round[(3*tanh(x/s_1)+7)/2], where round[x] rounds x to the
+	 * nearest integer, tanh(x) is the hyperbolic tangent, and 's_1' is a second
+	 * as-yet-undecided scaling factor. Therefore, it ends up mapping the
+	 * weighted sum to some integer from 2 to 5, inclusive. This 129-tuple of
+	 * real numbers from 0 to 1 represents a chess move. There are three types
+	 * of output boxes, starting-point boxes, finishing-point boxes, and
+	 * promotion boxes. Every move in chess for a given board position can be
+	 * uniquely represented by the starting square and the finishing
+	 * square--except for promotion, which also must include which piece one is
+	 * promoting to. This special case is why box 129 exists. First, illegal
+	 * moves are removed. (Most will be easy--moves that start on an empty
+	 * square or an opponents piece will be immediate; for others I'll have to
+	 * take into account the piece's movement pattern. That leaves things like
+	 * check and whatnot to worry about.) Second, I look at all of the remaining
+	 * moves, which are represented as pairs of numbers from 0 to 1, and
+	 * multiply them together, yielding a new number from 0 to 1. This number
+	 * represents a move's final score; the move with the highest score is
+	 * how the net actually moves. TODO: What about ties? 
 	 */
 
 }
