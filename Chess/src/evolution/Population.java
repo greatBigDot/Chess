@@ -3,6 +3,9 @@ package evolution;
 import java.util.Random;
 
 public class Population {
+	//See bottom of Genome.java to see an in-depth overview of this entire
+	//system.
+	
 	Genome[] genomes;
 	long[] seeds;
 	int size;
@@ -28,8 +31,8 @@ public class Population {
 	public static double[] select(Genome[] genome){
 		/* This is the key. It's where it's decided who lives and who dies, it's where the neural
 		 *  network actually does stuff, it's where the rules of chess come in...you get the
-		 *  idea. When I make a general genome class and not a chess-specific one like this, I 
-		 *  will almost certainly have to abstract this method.
+		 *  idea. When I make general genome and population classes and not a chess-specific one
+		 *  like this, I will almost certainly have to abstract this method.
 		 */
 		
 		
