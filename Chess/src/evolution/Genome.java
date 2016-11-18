@@ -1,52 +1,6 @@
 package evolution;
 
-import java.util.Random;
-
 public class Genome {
-	//See below for a lengthy documentation.
-	
-	//Total number of weights per genome: 64^2 + 64*(64*2) = 12,288
-	//Genomes per population: roughly 1000
-	//Weights per population: roughly 12,288,000
-	
-	//TODO: Add castling! It'll mess up all the numbers: remember to use variables instead of hardcoded constants!
-	final static int LENGTH = 12288;
-	long seed;
-	double[][][] weights = new double[64][64][2];
-	
-//	public Genome(double[][][] weights){
-//		//This is mostly for debugging purposes.
-//		//TODO: Make exception or something for a weight parameter with improper dimensions. 
-//		this.weights = weights;
-//		//TODO: Consider setting seed here (but make sure it is something the seed could never be, like 0 or -1 or something)
-//	}
-	public Genome(long seed){
-		this.seed = seed;
-		Random random = new Random(seed);
-		/* While the lower bound is inclusive, the upper bound is exclusive. 
-		 * It's annoying, but it shouldn't matter; if it does, I'll make 
-		 * it (-2,2 + Double.MIN_VALUE) or whatever.
-		 */
-		double[] oneDimWeights = random.doubles(LENGTH,-2,2).toArray();
-		//TODO: There's got to be a more elegant way of doing this.
-		int count=0;
-		for(int i=0;i<=63;i++){
-			for(int j=0;j<=63;j++){
-				//The order makes sense if you think about it. Trust me.
-				weights[j][i][0] = oneDimWeights[count];
-				count++;
-			}
-		}
-		for(int i=0;i<=127;i++){
-			for(int j=0;j<=63;j++){
-				weights[j][i][1] = oneDimWeights[count];
-				count++;
-			}
-		}
-		if(count != LENGTH){
-			System.out.println("SOMETHING WENT HORRIBLY WRONG");  //maybe I should learn how to do exceptions...
-		}
-	}
 	
 	
 	
