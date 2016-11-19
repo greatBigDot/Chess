@@ -1,36 +1,146 @@
 package evolution;
 
+import java.util.Random;
+
 public class Genome {
+	/**
+	 * LAYER_k: The number of boxes in layer k.
+	 */
+	private final static int LAYER_0 = 66, LAYER_1 = 98, LAYER_2 = 129;
+	
+	/**
+	 * The number of codons in the genome.
+	 */
+	final static int LENGTH = LAYER_0*LAYER_1 + LAYER_1*LAYER_2;
+	
+	/**
+	 * The number of games each genome plays in the select stage.
+	 */
+	final static int NUM_ROUNDS = 20;
+	
+	/**
+	 * Counts how many games the genome has played so far.
+	 */
+	private int count;
+	
+	/**
+	 * Measures how good the neural network is at playing chess.
+	 */
+	private double fitness;
+	
+	/**
+	 * The seed used to randomly determine the values of the weights.
+	 */
+	final long seed;
+	
+	/**
+	 * Randomly generates, using seed, the codons.
+	 */
+	private final Random random;
+	
+	/**
+	 * The array containing all LENGTH of the weights of the neural network.
+	 */
+	double[] codons = new double[LENGTH];
+	
+	//private final NeuralNetwork nerualNet;
 	
 	
+	/**
+	 * A constructor to create a random genome; note that the initialization
+	 * stage of the genetic algorithm takes place in a seperate method, not
+     * the constructor.
+     *
+	 * @param seed	Used to initialize seed.
+	 */
+	public Genome(long seed){
+		//neuralNet = new NeuralNetwork(this);
+		this.seed = seed;
+		random = new Random(seed);
+		fitness=0;count=0;
+	}
 	
-	/**                          ****DOCUMENTATION****                          
+	
+	/**
+	 * An instance method that randomly creates the weights of the genome from
+	 * its seed.
+	 */
+	public void initialize(){
+		codons = random.doubles(LENGTH, -2, 2).toArray();
+	}
+	
+	/**
+	 * The part that does everything.
+	 * 
+	 * @param competitors	competitors.length should always be two.
+	 */
+	public void select(Genome[] competitors){
+		/* double result = NeuralNetwork.play(competitors[0].getNet,competitors[1].getNet);
+		 * competitors[0].adjustFitness(result);
+		 * competitors[1].adjustFitness(1-result);
+		 */
+	}
+
+	/* private NeuralNet getNet(){
+	 *     return neuralNet;
+	 * }
+	 */
+	
+	/**
+	 * 
+	 * @param adj
+	 */
+	private void adjustFitness(double adj){
+		/* If Population.select is written right, this method won't be called if
+		 * isFitnessFinal() returns true, but just in case.... There should
+		 * probably be an exception here instead.
+		 */
+		if(!isFitnessFinal()){
+			fitness *= count;
+			fitness += adj;;
+			fitness /= (count+1);
+			count+=1;
+		}
+	}
+	
+	protected boolean isFitnessFinal(){
+		//== should be sufficient, but I'm sure there are bugs here.
+		return count >= NUM_ROUNDS;
+	}
+	
+	/**
+	 * ****DOCUMENTATION****
 	 * 
 	 * I. EVOLUTION--
 	 * 
 	 * There are three stages to the genetic algorithm:
 	 * 
-	 * * Initialization: a sample population of thousands is randomly produced.
-	 * * Selection: a function maps each genome to a number from 0 to 1 
-	 *       representing how fit it is. I may limit it to 0, 0.5, and 1 in this 
-	 *       case--TODO: decide what to do about that.
-	 *  * Reproduction: use genetic operators (e.g., crossover and mutation) to
-	 *       produce next generation.
+	 * * Initialization--a sample population of thousands is randomly produced.
+	 * This occurs once, at the very start of the program. A given population is
+	 * ultimately determined by metaSeed.
 	 * 
+	 * * Selection--a game is simulated between several random pairs of genomes.
+	 * (This, therefore, is where the neural network comes in.) After each game,
+	 * each player in the pair has their fitness updated. After NUM_ROUNDS
+	 * games, the fitness is finalized. The fitness is a double from 0 to 1
+	 * representing how fit it is.
+	 * 
+	 * * Reproduction: use genetic operators (e.g., crossover and mutation) to
+	 * produce next generation.
+	 *
+	 *
 	 * These three are defined on an individual basis here. Those definitions
 	 * are then used to define the population-wide definitions in the Population
-	 * class. For example, the "select(Genome opponent)" method here simulates a
-	 * game between this and opponent, then gives a fitness score to this. (I 
-	 * made it instance instead of static to make it easier to generalize to an
-	 * arbitrary genetic algorithm. See, I can think ahead!) In Population.java,
-	 * the method select() is defined that runs each pair of genomes (these
-	 * pairs are guaranteed to be random by last generation's reproduction step)
-	 * through the select method here. It works analogously in the other two
-	 * steps. Also, note that while selection and reproduction are methods,
-	 * initialization is done in the constructor, both in this class and in
-	 * Population.
-	 * 
-	 * 
+	 * class. For example, the "select(Genome genomes[])" method here simulates
+	 * a game between Genome[0] and Genome[1], then gives a fitness score to
+	 * each. (I made them arrays instead of just having two inputs so that it
+	 * would be easier to abstract to an arbitrary genetic algorithm.) In
+	 * Population.java, a method select() is defined that runs each pair of
+	 * genomes (these pairs are guaranteed to be random by last generation's
+	 * reproduction step) through the select method here. It works analogously
+	 * in the other two steps.
+	 *
+	 *
 	 * With all of the (pseudo)randomness here, it can be hard to keep track of
 	 * what all the randomly generated numbers are. Here's an overview of all of
 	 * the random numbers and the seeds that produce them in both classes
@@ -56,12 +166,11 @@ public class Genome {
 	 *     popSize~=1000 longs from the Long.MIN_LENGTH to Long.MAX_LENGTH:
   	 *         * seed--an instance field of Genome. It produces LENGTH=12,288
 	 *         doubles from -2 to +2:
-  	 *             * weights--the weights of the neural network.  See the
+  	 *             * codons--the weights of the neural network. See the
   	 *             selection methods for more details on how the net works. Note
-  	 *             that these are packed into a three dimensional array that is
-  	 *             one of the instance fields of Genome. Also note that the
-  	 *             weights are often called codons throughout this
-  	 *             documentation. There are ~=12,288,000 per initial population.
+  	 *             that these are packed into an one dimensional array that is
+  	 *             one of the instance fields of Genome. There are ~=12,288,000
+  	 *             per initial population.
 	 * 
 	 *     * matingMetaSeed--[rep] This scheme's job is to split the gene pool
 	 *     into random, randomly ordered pairs. Like the mutation scheme, this
@@ -103,8 +212,7 @@ public class Genome {
 	 *             are thrown away. Those last two parts are why a given
 	 *             matingKey isn't associated with any gene in particular; it
 	 *             may end up far from where it started or forgotten entirely.
-	 *             It's also why more than popSize ints have to be produced.
-	 * 
+	 *             It's also why more than popSize ints have to be produced. 
 	 *  
 	 *     * metaCrossoverSeed--[rep] an instance field of Population. Note that
 	 *     though reproduction occurs every generation, there is only one of
