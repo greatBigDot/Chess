@@ -31,12 +31,12 @@ public class Genome {
 	/**
 	 * The seed used to randomly determine the values of the weights.
 	 */
-	final long seed;
+	long seed;
 	
 	/**
 	 * Randomly generates, using seed, the codons.
 	 */
-	private final Random random;
+	private Random random;
 	
 	/**
 	 * The array containing all LENGTH of the weights of the neural network.
@@ -58,6 +58,10 @@ public class Genome {
 		this.seed = seed;
 		random = new Random(seed);
 		fitness=0;count=0;
+	}
+	
+	public Genome(double[] codons){
+		this.codons = codons;
 	}
 	
 	
@@ -85,6 +89,21 @@ public class Genome {
 	 *     return neuralNet;
 	 * }
 	 */
+	
+	public Genome reproduce(Genome[] parents, double[] crossoverKeys){
+		double k = 1.0/(parents[0].fitness + parents[1].fitness);
+		double adjFitness = k*parents[0].fitness;
+		double[] codons = new double[LENGTH];
+		for(int i=0;i<=LENGTH-1;i++){
+			if(crossoverKeys[i]<=adjFitness){
+				codons[i] = parents[0].codons[i];
+			} else {
+				codons[i] = parents[1].codons[i];
+			}
+		}
+		Genome child = new Genome(codons);
+		return child;
+	}
 	
 	/**
 	 * 
