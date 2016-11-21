@@ -7,6 +7,8 @@ public class Genome {
 	 * LAYER_k: The number of boxes in layer k.
 	 */
 	private final static int LAYER_0 = 66, LAYER_1 = 98, LAYER_2 = 129;
+	private final static double MUTATE_VAL = 0.05;
+
 	
 	/**
 	 * The number of codons in the genome.
@@ -46,6 +48,7 @@ public class Genome {
 	//private final NeuralNetwork nerualNet;
 	
 	
+	
 	/**
 	 * A constructor to create a random genome; note that the initialization
 	 * stage of the genetic algorithm takes place in a seperate method, not
@@ -78,7 +81,7 @@ public class Genome {
 	 * 
 	 * @param competitors	competitors.length should always be two.
 	 */
-	public void select(Genome[] competitors){
+	public static void select(Genome[] competitors){
 		/* double result = NeuralNetwork.play(competitors[0].getNet,competitors[1].getNet);
 		 * competitors[0].adjustFitness(result);
 		 * competitors[1].adjustFitness(1-result);
@@ -90,7 +93,10 @@ public class Genome {
 	 * }
 	 */
 	
-	public Genome reproduce(Genome[] parents, double[] crossoverKeys){
+	public static Genome reproduce(Genome[] parents, long crossoverSeed){
+		Random randCrossover = new Random(crossoverSeed);
+		double[] crossoverKeys = randCrossover.doubles(LENGTH, 0, 1).toArray();
+		
 		double k = 1.0/(parents[0].fitness + parents[1].fitness);
 		double adjFitness = k*parents[0].fitness;
 		double[] codons = new double[LENGTH];
@@ -105,6 +111,10 @@ public class Genome {
 		return child;
 	}
 	
+	public void mutate(int codonPos,int dir){
+		//dir should always be -1, 0, or 1.
+		this.codons[codonPos]+= MUTATE_VAL*dir;
+	}
 	/**
 	 * 
 	 * @param adj
@@ -315,7 +325,8 @@ public class Genome {
 	 * crucially, *they change every generation.* Note also that the first
 	 * generation face-offs will also be random--each seed corresponds to a
 	 * random unique gene pool at the beginning, so the numbered labels don't
-	 * yet mean anything.)
+	 * yet mean anything.) Note that this means a genome will never play its
+	 * sibling--which I think should be a good thing.
 	 * 
 	 *
 	 * 
