@@ -111,9 +111,9 @@ public class Genome {
 		return child;
 	}
 	
-	public void mutate(int codonPos,int dir){
+	public void mutate(int codonPos){
 		//dir should always be -1, 0, or 1.
-		this.codons[codonPos]+= MUTATE_VAL*dir;
+		this.codons[Math.abs(codonPos)]+= MUTATE_VAL*Math.signum(codonPos);
 	}
 	/**
 	 * 
@@ -220,13 +220,13 @@ public class Genome {
 	 *         above 90%, a redundancyFactor of 10/9 is sufficient. For safety I
 	 *         may end up increasing this, however. It produces 
 	 *         redudancyFactor * popSize ~= 1111 ints from 0 to popSize-1~=999:
-	 *             * matingKey--please see Permutation.java to fully understand
-	 *             how this works; I'll just give a brief overview here. Each
-	 *             mating key acts as an "assignment value" for an element of
-	 *             the ordered ~1000-tuple (0,1,2,3,...,~999). For example, if
-	 *             the first (randomly produced) matingKey is 628, then 999 ends
-	 *             up in position 628 in the permuted ~999-tuple. (I did it
-	 *             backwards because it made the alhorithm's structure
+	 *             * matingKey--please see permutation.Permutation.java to fully
+	 *             understand how this works; I'll just give a brief overview
+	 *             here. Each mating key acts as an "assignment value" for an
+	 *             element of the ordered ~1000-tuple (0,1,2,3,...,~999). For
+	 *             example, if the first (randomly produced) matingKey is 628,
+	 *             then 999 ends up in position 628 in the permuted ~999-tuple.
+	 *             (I did it backwards because it made the algorithm's structure
 	 *             significantly clearer.) For values below popSize, the
 	 *             assignment value skips over spots in the partially permuted
 	 *             array that had already been filled in. When a matingKey
@@ -241,13 +241,13 @@ public class Genome {
 	 *             are thrown away. Those last two parts are why a given
 	 *             matingKey isn't associated with any gene in particular; it
 	 *             may end up far from where it started or forgotten entirely.
-	 *             It's also why more than popSize ints have to be produced. 
+	 *             It's also why more than POP_SIZE ints have to be produced. 
 	 *  
-	 *     * metaCrossoverSeed--[rep] an instance field of Population. Note that
+	 *     * crossoverMetaSeed--[rep] an instance field of Population. Note that
 	 *     though reproduction occurs every generation, there is only one of
-	 *     these per population (I really don't want to have to deal with meta-
-	 *     meta-seeds at this level). This should be okay so long as the
-	 *     mating scheme pairing process leaves them ordered randomly--AND
+	 *     these per evolutionary history (I really don't want to have to deal
+	 *     with meta-meta-seeds at this level). This should be okay so long as
+	 *     the mating scheme pairing process leaves them ordered randomly--AND
 	 *     orders them differently every generation. That way, the top genome
 	 *     (for example) won't have the first (of ~1000) crossoverSeed every
 	 *     time. I could be wrong, so... TODO: Make sure that meta-meta-seeds
@@ -281,7 +281,7 @@ public class Genome {
 	 *             my intuition is off.) There are ~= 12,288,000 per initial
 	 *             population.
 	 *             
-	 *     * metaMutationSeed--[rep] This seed scheme's function is to randomly
+	 *     * mutationMetaSeed--[rep] This seed scheme's function is to randomly
 	 *     mutate the next generation, every generation. Like mating seed
 	 *     scheme, this crosses time. Otherwise, with a low enough mutateProb,
 	 *     the codon at, say, position 32,019 could never be mutated, no matter
@@ -291,9 +291,9 @@ public class Genome {
 	 *     generation* from Long.MIN_LENGTH to Long.MAX_LENGTH:
 	 *         * mutationSeed--an instance field of Population. Every new 
 	 *         generation (and hence new population--with this strucure, each
-	 *         generation represents a different population object) has new
-	 *         mutationSeed. It's job is to produce ~=122,880 ints from
-	 *         ~=-12,288,000 to ~=12,288,000:
+	 *         generation represents a different population object) has a new
+	 *         mutationSeed. It's job is to produce MUTATE_PROB*LENGTH*POP_SIZE
+	 *         ~=122,880 ints from ~=-12,288,000 to ~=12,288,000:
 	 *             * mutateKey--so the way I'm making this work is a total
 	 *             kludge. ~=122,880 keys are produced--~=mutateProb of the
 	 *             total number of codons in the population. The mutation is

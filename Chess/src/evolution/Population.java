@@ -4,6 +4,7 @@ import java.util.Random;
 
 import permutation.Permutation;
 
+//See the bottom of Genome.java for complete overview of the evolution system.
 public class Population {
 	final static int POP_SIZE = 1000;
 	private final static int NUM_ROUNDS = 1;    //Increasing this may force me to create of a faceoff seed scheme. TODO: Figure that out
@@ -43,10 +44,15 @@ public class Population {
 	}
 	
 	public void initialize(){
+		/* Remember: the lower bound is inclusive, but the upper bound is
+		 * exclusive! Also, I'm pretty sure (but not positive) that not
+		 * including bounds sets them to Long.MIN_VALUE and Long.MAX_VALUE+1 
+		 * default.
+		 */
 		seeds = randCodons.longs(seeds.length).toArray();
-		matingKeys = randMatings.ints(matingKeys.length, 0, POP_SIZE-1).toArray();
+		matingKeys = randMatings.ints(matingKeys.length, 0, POP_SIZE).toArray();
 		crossoverSeeds = randMetaCrossovers.longs(crossoverSeeds.length).toArray();
-		mutationKeys = randMutations.ints(mutationKeys.length,-1*POP_SIZE*Genome.LENGTH,POP_SIZE*Genome.LENGTH).toArray();
+		mutationKeys = randMutations.ints(mutationKeys.length,-1*POP_SIZE*Genome.LENGTH+1,POP_SIZE*Genome.LENGTH).toArray();
 
 		for(int i = 0;i<=POP_SIZE-1;i++){
 			members[i] = new Genome(seeds[i]);
